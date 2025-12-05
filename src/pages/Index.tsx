@@ -1,11 +1,126 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { Users, TrendingUp, Database, Activity } from "lucide-react";
+import { Header } from "@/components/dashboard/Header";
+import { ChatPanel } from "@/components/dashboard/ChatPanel";
+import { SchemaExplorer } from "@/components/dashboard/SchemaExplorer";
+import { MetricsCard } from "@/components/dashboard/MetricsCard";
+import { DataTable } from "@/components/dashboard/DataTable";
+import { InsightChart } from "@/components/dashboard/InsightChart";
+import { useDataInsights } from "@/hooks/useDataInsights";
+import { useSchema } from "@/hooks/useSchema";
+import { toast } from "sonner";
 
 const Index = () => {
+  const { tables, isLoading: schemaLoading, refetch: refetchSchema, getSchemaString } = useSchema();
+  const { messages, isLoading: chatLoading, sendMessage, executeQuery, clearMessages } = useDataInsights(getSchemaString());
+  const [queryResult, setQueryResult] = useState<any[] | null>(null);
+  const [selectedChartType, setSelectedChartType] = useState<"line" | "bar" | "pie" | "area" | "scatter">("bar");
+
+  const handleExecuteQuery = async (sql: string) => {
+    toast.info("Executing query...");
+    const result = await executeQuery(sql);
+    if (result) {
+      setQueryResult(result);
+      toast.success(`Query returned ${result.length} rows`);
+    }
+  };
+
+  // Sample metrics for demonstration
+  const metrics = [
+    { title: "Total Records", value: "—", change: undefined, icon: Database, iconColor: "text-primary" },
+    { title: "Active Users", value: "—", change: undefined, icon: Users, iconColor: "text-accent" },
+    { title: "Growth Rate", value: "—", change: undefined, icon: TrendingUp, iconColor: "text-success" },
+    { title: "Activity Score", value: "—", change: undefined, icon: Activity, iconColor: "text-warning" },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <div className="flex h-[calc(100vh-4rem)]">
+        {/* Left Sidebar - Schema Explorer */}
+        <aside className="w-72 border-r border-border/50 p-4 hidden lg:block">
+          <SchemaExplorer
+            tables={tables}
+            isLoading={schemaLoading}
+            onRefresh={refetchSchema}
+          />
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">
+          <div className="p-6 space-y-6">
+            {/* Welcome Section */}
+            <div className="space-y-1">
+              <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
+              <p className="text-muted-foreground">
+                Ask questions about your data using natural language, and I'll help you analyze it.
+              </p>
+            </div>
+
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              {metrics.map((metric) => (
+                <MetricsCard key={metric.title} {...metric} />
+              ))}
+            </div>
+
+            {/* Query Results */}
+            {queryResult && queryResult.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold">Query Results</h3>
+                  <div className="flex gap-1">
+                    {(["bar", "line", "area", "pie", "scatter"] as const).map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setSelectedChartType(type)}
+                        className={`px-2 py-1 text-xs rounded ${
+                          selectedChartType === type 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  <InsightChart 
+                    data={queryResult} 
+                    chartType={selectedChartType}
+                    title="Data Visualization"
+                  />
+                  <DataTable data={queryResult} title="Raw Data" maxRows={50} />
+                </div>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!queryResult && (
+              <div className="rounded-xl border border-dashed border-border/50 bg-muted/20 p-12 text-center">
+                <Database className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                <h3 className="font-semibold mb-2">No query results yet</h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Start by asking a question in the chat panel, or create some tables in your database to get started.
+                </p>
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* Right Sidebar - Chat Panel */}
+        <aside className="w-96 border-l border-border/50 p-4 hidden md:block">
+          <ChatPanel
+            messages={messages}
+            isLoading={chatLoading}
+            onSendMessage={sendMessage}
+            onExecuteQuery={handleExecuteQuery}
+            onClear={clearMessages}
+          />
+        </aside>
       </div>
     </div>
   );

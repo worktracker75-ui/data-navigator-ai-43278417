@@ -1,0 +1,7 @@
+project_id = "buuayboheerxgpspdcct"
+
+[functions.data-insights]
+verify_jwt = false
+
+[functions.execute-query]
+verify_jwt = false
