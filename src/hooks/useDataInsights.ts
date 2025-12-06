@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface Message {
+export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
