@@ -15,7 +15,11 @@ import { toast } from "sonner";
 
 const Index = () => {
   const { tables, isLoading: schemaLoading, refetch: refetchSchema, getSchemaString } = useSchema();
-  const { messages, isLoading: chatLoading, sendMessage, executeQuery, clearMessages } = useDataInsights(getSchemaString());
+  const [csvData, setCsvData] = useState<any[] | null>(null);
+  const { messages, isLoading: chatLoading, sendMessage, executeQuery, clearMessages } = useDataInsights(
+    getSchemaString(),
+    csvData || undefined
+  );
   const [queryResult, setQueryResult] = useState<any[] | null>(null);
   const [selectedChartType, setSelectedChartType] = useState<"line" | "bar" | "pie" | "area" | "scatter">("bar");
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
@@ -30,16 +34,45 @@ const Index = () => {
   };
 
   const handleCsvData = (data: any[]) => {
+    setCsvData(data);
     setQueryResult(data);
   };
 
-  // Sample metrics for demonstration
-  const metrics = [
-    { title: "Total Records", value: "—", change: undefined, icon: Database, iconColor: "text-primary" },
-    { title: "Active Users", value: "—", change: undefined, icon: Users, iconColor: "text-accent" },
-    { title: "Growth Rate", value: "—", change: undefined, icon: TrendingUp, iconColor: "text-success" },
-    { title: "Activity Score", value: "—", change: undefined, icon: Activity, iconColor: "text-warning" },
-  ];
+  // Calculate metrics from CSV data
+  const calculateMetrics = () => {
+    if (!csvData || csvData.length === 0) {
+      return [
+        { title: "Total Records", value: "—", change: undefined, icon: Database, iconColor: "text-primary" },
+        { title: "Active Users", value: "—", change: undefined, icon: Users, iconColor: "text-accent" },
+        { title: "Growth Rate", value: "—", change: undefined, icon: TrendingUp, iconColor: "text-success" },
+        { title: "Activity Score", value: "—", change: undefined, icon: Activity, iconColor: "text-warning" },
+      ];
+    }
+
+    const totalRecords = csvData.length;
+    const columns = Object.keys(csvData[0]);
+    
+    // Find status column and count active
+    const statusCol = columns.find(c => c.toLowerCase().includes('status'));
+    const activeCount = statusCol 
+      ? csvData.filter(row => String(row[statusCol]).toLowerCase() === 'active').length 
+      : 0;
+
+    // Find numeric column for sum/avg
+    const numericCol = columns.find(c => typeof csvData[0][c] === 'number');
+    const total = numericCol 
+      ? csvData.reduce((sum, row) => sum + (Number(row[numericCol]) || 0), 0)
+      : 0;
+
+    return [
+      { title: "Total Records", value: totalRecords.toLocaleString(), change: undefined, icon: Database, iconColor: "text-primary" },
+      { title: "Active Count", value: statusCol ? activeCount.toLocaleString() : "—", change: statusCol ? `${((activeCount/totalRecords)*100).toFixed(0)}%` : undefined, icon: Users, iconColor: "text-accent" },
+      { title: "Columns", value: columns.length.toString(), change: undefined, icon: TrendingUp, iconColor: "text-success" },
+      { title: numericCol ? `Total ${numericCol}` : "Sum", value: numericCol ? total.toLocaleString() : "—", change: undefined, icon: Activity, iconColor: "text-warning" },
+    ];
+  };
+
+  const metrics = calculateMetrics();
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,7 +96,7 @@ const Index = () => {
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
                 <p className="text-muted-foreground">
-                  Ask questions about your data using natural language, and I'll help you analyze it.
+                  Upload CSV data and ask questions about it. The AI will analyze and create visual reports.
                 </p>
               </div>
               <Button
@@ -80,6 +113,11 @@ const Index = () => {
             <div className="rounded-xl border border-border/50 bg-card/30 p-4">
               <h3 className="font-semibold mb-3">Upload Data</h3>
               <CsvUploader onDataUploaded={handleCsvData} />
+              {csvData && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  ✓ {csvData.length} rows loaded. Click "AI Data Assistant" to ask questions or create reports!
+                </p>
+              )}
             </div>
 
             {/* Metrics Grid */}
@@ -93,7 +131,7 @@ const Index = () => {
             {queryResult && queryResult.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">Query Results</h3>
+                  <h3 className="font-semibold">Data Visualization</h3>
                   <div className="flex gap-1">
                     {(["bar", "line", "area", "pie", "scatter"] as const).map((type) => (
                       <button
@@ -126,9 +164,9 @@ const Index = () => {
             {!queryResult && (
               <div className="rounded-xl border border-dashed border-border/50 bg-muted/20 p-12 text-center">
                 <Database className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="font-semibold mb-2">No query results yet</h3>
+                <h3 className="font-semibold mb-2">No data yet</h3>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  Start by uploading a CSV file or asking a question using the AI Data Assistant button.
+                  Upload a CSV file to get started. Then use the AI Data Assistant to ask questions about your data and generate visual reports.
                 </p>
               </div>
             )}

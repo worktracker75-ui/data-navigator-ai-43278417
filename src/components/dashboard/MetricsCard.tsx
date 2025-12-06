@@ -2,10 +2,10 @@ import { LucideIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-interface MetricsCardProps {
+export interface MetricsCardProps {
   title: string;
   value: string | number;
-  change?: number;
+  change?: number | string;
   changeLabel?: string;
   icon: LucideIcon;
   iconColor?: string;
@@ -19,15 +19,17 @@ export function MetricsCard({
   icon: Icon,
   iconColor = "text-primary",
 }: MetricsCardProps) {
+  const isNumericChange = typeof change === 'number';
+  
   const getTrendIcon = () => {
-    if (change === undefined) return null;
+    if (!isNumericChange) return null;
     if (change > 0) return <TrendingUp className="h-3 w-3" />;
     if (change < 0) return <TrendingDown className="h-3 w-3" />;
     return <Minus className="h-3 w-3" />;
   };
 
   const getTrendColor = () => {
-    if (change === undefined) return "";
+    if (!isNumericChange) return "text-muted-foreground";
     if (change > 0) return "text-success";
     if (change < 0) return "text-destructive";
     return "text-muted-foreground";
@@ -49,9 +51,9 @@ export function MetricsCard({
         <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-border/50">
           <span className={cn("flex items-center gap-1 text-sm font-medium", getTrendColor())}>
             {getTrendIcon()}
-            {Math.abs(change).toFixed(1)}%
+            {isNumericChange ? `${Math.abs(change).toFixed(1)}%` : change}
           </span>
-          <span className="text-xs text-muted-foreground">{changeLabel}</span>
+          {isNumericChange && <span className="text-xs text-muted-foreground">{changeLabel}</span>}
         </div>
       )}
     </Card>

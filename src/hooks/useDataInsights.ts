@@ -12,7 +12,7 @@ export interface Message {
   timestamp: Date;
 }
 
-export function useDataInsights(schema: string) {
+export function useDataInsights(schema: string, csvData?: any[]) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -66,6 +66,7 @@ export function useDataInsights(schema: string) {
             messages: [...chatHistory, { role: "user", content }],
             schema,
             action: "chat",
+            csvData,
           }),
         }
       );
@@ -129,7 +130,7 @@ export function useDataInsights(schema: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, schema]);
+  }, [messages, schema, csvData]);
 
   const executeQuery = useCallback(async (sql: string) => {
     try {
