@@ -8,13 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  sql?: string;
-  timestamp: Date;
-}
+import { Message } from "@/hooks/useDataInsights";
 
 interface ChatPanelProps {
   messages: Message[];
@@ -22,6 +16,7 @@ interface ChatPanelProps {
   onSendMessage: (content: string) => void;
   onExecuteQuery: (sql: string) => void;
   onClear: () => void;
+  fullScreen?: boolean;
 }
 
 export function ChatPanel({ 
@@ -29,7 +24,8 @@ export function ChatPanel({
   isLoading, 
   onSendMessage, 
   onExecuteQuery,
-  onClear 
+  onClear,
+  fullScreen = false,
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -69,7 +65,10 @@ export function ChatPanel({
   };
 
   return (
-    <Card className="flex flex-col h-full border-border/50 bg-card/50 backdrop-blur-sm">
+    <Card className={cn(
+      "flex flex-col border-border/50 bg-card/50 backdrop-blur-sm",
+      fullScreen ? "h-full" : "h-full"
+    )}>
       <div className="flex items-center justify-between p-4 border-b border-border/50">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-primary/10">

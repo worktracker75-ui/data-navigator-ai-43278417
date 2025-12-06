@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Users, TrendingUp, Database, Activity } from "lucide-react";
+import { Users, TrendingUp, Database, Activity, Sparkles } from "lucide-react";
 import { Header } from "@/components/dashboard/Header";
 import { ChatPanel } from "@/components/dashboard/ChatPanel";
 import { SchemaExplorer } from "@/components/dashboard/SchemaExplorer";
 import { MetricsCard } from "@/components/dashboard/MetricsCard";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { InsightChart } from "@/components/dashboard/InsightChart";
+import { CsvUploader } from "@/components/dashboard/CsvUploader";
+import { AiAssistantModal } from "@/components/dashboard/AiAssistantModal";
+import { Button } from "@/components/ui/button";
 import { useDataInsights } from "@/hooks/useDataInsights";
 import { useSchema } from "@/hooks/useSchema";
 import { toast } from "sonner";
@@ -15,6 +18,7 @@ const Index = () => {
   const { messages, isLoading: chatLoading, sendMessage, executeQuery, clearMessages } = useDataInsights(getSchemaString());
   const [queryResult, setQueryResult] = useState<any[] | null>(null);
   const [selectedChartType, setSelectedChartType] = useState<"line" | "bar" | "pie" | "area" | "scatter">("bar");
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   const handleExecuteQuery = async (sql: string) => {
     toast.info("Executing query...");
@@ -23,6 +27,10 @@ const Index = () => {
       setQueryResult(result);
       toast.success(`Query returned ${result.length} rows`);
     }
+  };
+
+  const handleCsvData = (data: any[]) => {
+    setQueryResult(data);
   };
 
   // Sample metrics for demonstration
@@ -50,12 +58,28 @@ const Index = () => {
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           <div className="p-6 space-y-6">
-            {/* Welcome Section */}
-            <div className="space-y-1">
-              <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-              <p className="text-muted-foreground">
-                Ask questions about your data using natural language, and I'll help you analyze it.
-              </p>
+            {/* Welcome Section with AI Button */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
+                <p className="text-muted-foreground">
+                  Ask questions about your data using natural language, and I'll help you analyze it.
+                </p>
+              </div>
+              <Button
+                onClick={() => setIsAiModalOpen(true)}
+                className="gap-2 shrink-0"
+                size="lg"
+              >
+                <Sparkles className="h-5 w-5" />
+                AI Data Assistant
+              </Button>
+            </div>
+
+            {/* CSV Upload Section */}
+            <div className="rounded-xl border border-border/50 bg-card/30 p-4">
+              <h3 className="font-semibold mb-3">Upload Data</h3>
+              <CsvUploader onDataUploaded={handleCsvData} />
             </div>
 
             {/* Metrics Grid */}
@@ -104,7 +128,7 @@ const Index = () => {
                 <Database className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
                 <h3 className="font-semibold mb-2">No query results yet</h3>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  Start by asking a question in the chat panel, or create some tables in your database to get started.
+                  Start by uploading a CSV file or asking a question using the AI Data Assistant button.
                 </p>
               </div>
             )}
@@ -122,6 +146,17 @@ const Index = () => {
           />
         </aside>
       </div>
+
+      {/* Full Screen AI Modal */}
+      <AiAssistantModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        messages={messages}
+        isLoading={chatLoading}
+        onSendMessage={sendMessage}
+        onExecuteQuery={handleExecuteQuery}
+        onClear={clearMessages}
+      />
     </div>
   );
 };
