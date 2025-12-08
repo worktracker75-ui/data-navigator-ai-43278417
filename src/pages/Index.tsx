@@ -194,6 +194,8 @@ const Index = () => {
         onSendMessage={sendMessage}
         onExecuteQuery={handleExecuteQuery}
         onClear={clearMessages}
+        csvData={csvData || []}
+        onCsvUpload={handleCsvData}
       />
     </div>
   );
