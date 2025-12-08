@@ -1,40 +1,20 @@
-# Welcome to your Lovable project
+# Welcome to your GenAI-Powered Data Insights Assistant project
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**URL**: [Live Link Click Here ](https://data-navigator-ai.vercel.app/)
 
-## How can I edit this code?
 
-There are several ways of editing your application.
+**Project Description**
+A GenAI-based assistant that connects to SQL databases, reads data, performs analysis, and generates human-like insights using LLMs. The system automates data exploration, summarization, and reporting without needing manual queries.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+**Problem it Solves** :
+Most business users struggle to write SQL queries or understand complex datasets. This tool removes that barrier by automatically fetching data, analyzing patterns, and producing clear insights instantly. It speeds up decision-making and reduces dependency on analysts.
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+You can work on this project using any IDE you are comfortable with — such as VS Code, PyCharm, Jupyter Notebook, or any other environment that supports Python development.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
 
 **Edit a file directly in GitHub**
 
@@ -54,20 +34,32 @@ npm run dev
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Python
+Core programming language for building the entire pipeline.
 
-## How can I deploy this project?
+2. LangChain
+Used for LLM orchestration, prompt templates, chaining logic, and connecting data to the model.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+3. OpenAI API (LLMs)
+Generates insights, summaries, and reasoning-based responses from SQL output.
 
-## Can I connect a custom domain to my Lovable project?
+4. SQL Databases (MySQL / PostgreSQL / SQL Server)
+Data storage layer that the assistant connects to for query execution.
 
-Yes, you can!
+5. Pandas
+For data cleaning, analysis, transformation, and tabular operations.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+6. Secure Database Connectors
+To safely connect and query SQL databases (e.g., sqlalchemy, mysql-connector, psycopg2).
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+7. Caching System
+Reduces repeated calls and improves performance (e.g., in-memory cache or LangChain cache).
+
+8. Modular Architecture
+Allows adding new data sources, plugins, and custom logic easily.
+
+9. Logging & Auditing
+Tracks user queries and LLM interactions for compliance.
+
+
+
